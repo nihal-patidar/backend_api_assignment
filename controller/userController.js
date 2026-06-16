@@ -53,5 +53,27 @@ function getUser(req , res){
     })
 }
 
+function updateUser(req , res){
 
-export {createUser, getAllUser, getUser}
+    const {id} = req.params ;
+    const newUser = req.body ;
+
+    console.log("Newuser ",newUser)
+
+    const result = users.findIndex((user)=> user.id === id);
+
+    if(result === -1){
+        return res.status(404).send({
+            msg : "user Not Found",
+        })
+    }
+
+    users[result] = newUser ;
+    console.log("user ", users[result]);
+    return res.status(200).send({
+        user : users[result]
+    })
+}
+
+
+export {createUser, getAllUser, getUser, updateUser}
