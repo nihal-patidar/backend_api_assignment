@@ -33,5 +33,25 @@ function createUser(req , res){
     })
 }
 
+function getUser(req , res){
 
-export {createUser, getAllUser}
+    console.log("log body",req.body);
+    console.log("log query".req?.query);
+    console.log("log params",req.params);
+
+    const {id} = req.params ;
+
+    const result = users.find((user)=> user.id === id);
+    if(!result){
+        return res.status(404).send({
+            msg : "User not found",
+        })
+    }
+
+    return res.status(200).send({
+        user : result 
+    })
+}
+
+
+export {createUser, getAllUser, getUser}

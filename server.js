@@ -6,7 +6,7 @@ const app = express(); //creating a server ;
 app.use(express.json());
 
 
-app.use('/',routes);
+app.use('/',routes); // integrating external routes
 
 
 app.listen(3000,()=>{ // listening on port 3000
