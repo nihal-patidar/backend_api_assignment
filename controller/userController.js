@@ -4,7 +4,7 @@ import users from "../users.js";
 
 function getAllUser(req, res){
 
-    if(users.length) return res.status(404).send({
+    if(!users.length) return res.status(404).send({
         msg : "No user Found",
     })
 
