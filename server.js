@@ -1,15 +1,26 @@
-// import express for creating a server.
-import express from 'express' ;
-import routes from './routes.js';
+// Import Express framework
+import express from "express";
 
-const app = express(); //creating a server ;
+// Import application routes
+import routes from "./routes.js";
+
+// Import custom middleware
+import { loggerFunction } from "./middleware.js";
+
+// Create Express application instance
+const app = express();
+
+// Parse incoming JSON requests
 app.use(express.json());
 
+// Log details of every request
+app.use(loggerFunction);
 
-app.use('/',routes); // integrating external routes
+// Register all application routes
+app.use("/", routes);
 
-
-app.listen(3000,()=>{ // listening on port 3000
-    console.log("server is running on ", 3000);
-})
-
+// Start server on port 3000
+app.listen(3000, () => {
+  // Confirm server startup
+  console.log("Server is running on port 3000");
+});
