@@ -41,16 +41,19 @@ function createUser(req, res) {
   }
 
   // Create and store the new user.
-  users.push({
+  const newUser = {
     id,
     firstName,
     lastName,
     hobby,
-  });
+  }
+
+  users.push(newUser);
 
   // 201 Created -> Resource created successfully.
   return res.status(201).send({
     msg: "User created successfully",
+    user : newUser
   });
 }
 
