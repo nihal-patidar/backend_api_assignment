@@ -1,125 +1,151 @@
-// import users from "../users.js";
-// import { removeUserFromArray } from "../users.js"; 
+// In-memory data store used for assignment purposes.
+// Data will be reset whenever the server restarts.
+const users = [];
 
-// above method having some issues , because ES module are read-only , we can't change
-// the reference , and if I'm changing it using on delete setter function , then I'm still
-// old array data because I'm not using getter function for it.
-
-var users = [] ;
-
-function getAllUser(req, res){
-
-    
-
-    // status 200 -> valid request 
-    if(!users.length) return res.status(200).send({
-        msg : "No user found",
-        users : users 
-    })
-
-    // status 200 -> valid request 
+/**
+ * GET /users
+ * Fetch all users from the in-memory data store.
+ */
+function getAllUser(req, res) {
+  // Return an empty array if no users are available.
+  if (!users.length) {
     return res.status(200).send({
-        msg : "Found Successful",
-        users : users 
-    })
+      msg: "No users found",
+      users,
+    });
+  }
+
+  // Successfully retrieved all users.
+  return res.status(200).send({
+    msg: "Users fetched successfully",
+    users,
+  });
 }
 
+/**
+ * POST /user
+ * Create a new user.
+ */
+function createUser(req, res) {
+  console.log("Request Body:", req.body);
 
-function createUser(req , res){
-    console.log("log body" , req.body)
-    const { id , firstName , lastName , hobby } = req.body ;
+  const { id, firstName, lastName, hobby } = req.body;
 
+  // Prevent creation of users with duplicate IDs.
+  const existingUser = users.find((user) => user.id === id);
 
-    if(users.find((user)=>user.id === id)){
+  if (existingUser) {
+    return res.status(409).send({
+      error: "User already exists with this ID",
+    });
+  }
 
-        // status 409 -> duplicate id
-        return res.status(409).send({
-            err : "user already present : duplicate id"
-        })
-    }
+  // Create and store the new user.
+  users.push({
+    id,
+    firstName,
+    lastName,
+    hobby,
+  });
 
-    users.push({id : id , firstName : firstName , lastName : lastName , hobby : hobby});
-
-    //status 201 -> document created 
-    res.status(201).send({
-        msg : "user has been created successfully"
-    })
+  // 201 Created -> Resource created successfully.
+  return res.status(201).send({
+    msg: "User created successfully",
+  });
 }
 
-function getUser(req , res){
+/**
+ * GET /users/:id
+ * Fetch a specific user by ID.
+ */
+function getUser(req, res) {
+  console.log("Request Body:", req.body);
+  console.log("Request Query:", req.query);
+  console.log("Request Params:", req.params);
 
-    console.log("log body",req.body);
-    console.log("log query".req?.query);
-    console.log("log params",req.params);
+  const { id } = req.params;
 
-    const {id} = req.params ;
+  // Search for user by ID.
+  const user = users.find((user) => user.id === id);
 
-    const result = users.find((user)=> user.id === id);
-    if(!result){
-        //status 404 -> user not found ;
-        return res.status(404).send({
-            msg : "User not found",
-        })
-    }
+  if (!user) {
+    // 404 Not Found -> Requested user does not exist.
+    return res.status(404).send({
+      msg: "User not found",
+    });
+  }
 
-    // status 200 , ok , user found
-    return res.status(200).send({
-        user : result 
-    })
+  // Successfully retrieved the requested user.
+  return res.status(200).send({
+    user,
+  });
 }
 
-function updateUser(req , res){
+/**
+ * PUT /user/:id
+ * Update an existing user.
+ */
+function updateUser(req, res) {
+  const { id } = req.params;
+  const updatedData = req.body;
 
-    const {id} = req.params ;
-    const newUser = req.body ;
+  console.log("Updated Data:", updatedData);
 
-    console.log("Newuser ",newUser)
+  // Find user index in the array.
+  const userIndex = users.findIndex((user) => user.id === id);
 
-    const result = users.findIndex((user)=> user.id === id);
+  if (userIndex === -1) {
+    // 404 Not Found -> User does not exist.
+    return res.status(404).send({
+      msg: "User not found",
+    });
+  }
 
-    if(result === -1){
-        // status 404 -> user not found 
-        return res.status(404).send({
-            msg : "user Not Found",
-        })
-    }
+  // Merge existing data with new data.
+  users[userIndex] = {
+    ...users[userIndex],
+    ...updatedData,
+  };
 
-    users[result] = {...users[result] , ...newUser} ;
-    console.log("user ", users[result]);
-  
-
-  
-    return res.status(200).send({
-        user : users[result]
-    })
+  // Successfully updated user details.
+  return res.status(200).send({
+    msg: "User updated successfully",
+    user: users[userIndex],
+  });
 }
 
-function deleteUser (req , res){
+/**
+ * DELETE /user/:id
+ * Delete a user by ID.
+ */
+function deleteUser(req, res) {
+  const { id } = req.params;
 
-    const {id} = req.params ;
+  console.log("User ID:", id);
 
-    console.log("id",id)
-    
+  // Find user index before deletion.
+  const userIndex = users.findIndex((user) => user.id === id);
 
+  if (userIndex === -1) {
+    // 404 Not Found -> User does not exist.
+    return res.status(404).send({
+      msg: "User not found",
+    });
+  }
 
-    const result = users.findIndex((user)=> user.id === id);
+  // Remove the user from the array.
+  users.splice(userIndex, 1);
 
-    if(result === -1){
-        return res.status(404).send({
-            msg : "User Not Found"
-        })
-    }
-
-    // delete users[result];
-    // users = users.filter(user => user.id !== id);
-    // removeUserFromArray(id)
-
-    users.splice(result , 1)
-
-    return res.status(200).send({
-        msg : "User has been deleted successfully"
-    })
+  // Successfully deleted the user.
+  return res.status(200).send({
+    msg: "User deleted successfully",
+  });
 }
 
-
-export {createUser, getAllUser, getUser, updateUser, deleteUser}
+export {
+  createUser,
+  getAllUser,
+  getUser,
+  updateUser,
+  deleteUser,
+};
